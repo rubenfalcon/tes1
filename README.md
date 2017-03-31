@@ -1,4 +1,6 @@
 # 
+https://blogs.technet.microsoft.com/kv/2016/09/26/get-started-with-azure-key-vault-certificates/
+
 http://www.rahulpnath.com/blog/pfx-certificate-in-azure-key-vault/
 
 https://blogs.technet.microsoft.com/kv/2016/09/26/get-started-with-azure-key-vault-certificates/
