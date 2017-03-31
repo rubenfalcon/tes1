@@ -1,4 +1,6 @@
 # 
+http://www.rahulpnath.com/blog/pfx-certificate-in-azure-key-vault/
+
 http://itext.2136553.n4.nabble.com/Luna-SA-HSM-Integration-with-iTextSharp-td2552278.html
 
 For the sake of closure and perhaps saving someone else from running off on the same wild goose chase in the future, I thought I would post an update here. 
