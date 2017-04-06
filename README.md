@@ -1,5 +1,7 @@
 # 
 
+https://inducesmile.com/android/android-6-marshmallow-runtime-permissions-request-example/
+
 https://www.captechconsulting.com/blogs/runtime-permissions-best-practices-and-how-to-gracefully-handle-permission-removal
 
 https://github.com/googlesamples/android-RuntimePermissions/blob/master/Application/src/main/java/com/example/android/system/runtimepermissions/MainActivity.java
