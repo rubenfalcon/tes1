@@ -1,4 +1,5 @@
 # 
+https://www.codeproject.com/Articles/507651/Customized-Android-ListView-with-Image-and-Text
 
 https://inducesmile.com/android/android-6-marshmallow-runtime-permissions-request-example/
 
