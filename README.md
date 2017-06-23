@@ -122,3 +122,45 @@ Mike
             //  Encode the CMS/PKCS #7 message. 
             return signedCms.Encode(); 
         } 
+        
+         var data = UtilityHelper.Deserialize(json);
+            var data1 = UtilityHelper.Deserialize(json2, r => 
+            {
+                if (r["type"].ToString().Equals("album", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return (typeof(Gallery<>)).MakeGenericType(typeof(AlbumItem));  
+                }
+                else
+                    return (typeof(Gallery<>)).MakeGenericType(typeof(ImageItem));  
+            });
+            
+        string json = @"{ id: 1, type:'album', data: { name:'ruben' } }";
+
+            string json2 = @"{ id: 1, type:'image', data: { lastname:'ruben' } }";
+        
+        public static object Deserialize(string jsonEnCondedData, Func<JObject, Type> typeResolver)
+        {
+            JObject item = JObject.Parse(jsonEnCondedData);
+
+            Type t = typeResolver(item);
+
+            return JsonConvert.DeserializeObject(jsonEnCondedData, t);            
+        }
+
+        public static object Deserialize(string jsonEnCondedData)
+        {
+            JObject item = JObject.Parse(jsonEnCondedData);            
+
+            if (item["type"].ToString().Equals("album", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var handlerType = (typeof(Gallery<>)).MakeGenericType(typeof(AlbumItem));
+
+                return JsonConvert.DeserializeObject(jsonEnCondedData, handlerType);
+            }
+            else
+            {
+                var handlerType = (typeof(Gallery<>)).MakeGenericType(typeof(ImageItem));
+
+                return JsonConvert.DeserializeObject(jsonEnCondedData, handlerType);
+            }
+        }
