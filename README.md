@@ -1,5 +1,7 @@
 # 
 
+http://www.31a2ba2a-b718-11dc-8314-0800200c9a66.com/2012/02/combining-multiple-azure-worker-roles.html
+
 https://blogs.msdn.microsoft.com/kaevans/2015/02/24/scaling-azure-event-hubs-processing-with-worker-roles/
 
 https://www.hangfire.io/overview.html
