@@ -1,5 +1,7 @@
 # 
 
+http://mark.mymonster.nl/2013/01/29/running-multiple-workers-inside-one-windows-azure-worker-role
+
 https://msdn.microsoft.com/en-us/library/ff803365.aspx
 
 http://www.31a2ba2a-b718-11dc-8314-0800200c9a66.com/2012/02/combining-multiple-azure-worker-roles.html
