@@ -1,5 +1,7 @@
 # 
 
+https://blogs.msdn.microsoft.com/jpsanders/2009/05/20/understanding-maxservicepointidletime-and-defaultconnectionlimit/
+
 https://developers.google.com/maps/documentation/javascript/firebase
 
 https://maps-apis.googleblog.com/2015/06/code-road-android-app-store-your.html
