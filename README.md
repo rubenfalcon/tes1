@@ -1,5 +1,11 @@
 # 
 
+https://blogs.msdn.microsoft.com/kaevans/2015/02/24/scaling-azure-event-hubs-processing-with-worker-roles/
+
+https://www.hangfire.io/overview.html
+
+https://stackoverflow.com/questions/30248007/azure-eventprocessorhost-and-worker-role
+
 https://blogs.msdn.microsoft.com/jpsanders/2009/05/20/understanding-maxservicepointidletime-and-defaultconnectionlimit/
 
 https://developers.google.com/maps/documentation/javascript/firebase
