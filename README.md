@@ -1,5 +1,7 @@
 # 
 
+https://damienbod.com/2013/11/05/using-signalr-with-unity/
+
 http://mark.mymonster.nl/2013/01/29/running-multiple-workers-inside-one-windows-azure-worker-role
 
 https://msdn.microsoft.com/en-us/library/ff803365.aspx
