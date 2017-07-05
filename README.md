@@ -1,5 +1,7 @@
 # 
 
+https://stackoverflow.com/questions/17449389/azure-web-role-configuration-settings-across-environments
+
 https://damienbod.com/2013/11/05/using-signalr-with-unity/
 
 https://github.com/aspnet/SignalR/tree/dev/samples/SocialWeather
