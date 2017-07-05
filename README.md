@@ -1,4 +1,17 @@
 # 
+https://github.com/aspnet/SignalR/tree/dev/samples/SocialWeather
+
+https://docs.microsoft.com/en-us/aspnet/signalr/overview/guide-to-the-api/hubs-api-guide-server#asyncmethods
+
+https://docs.microsoft.com/en-us/aspnet/signalr/overview/getting-started/tutorial-server-broadcast-with-signalr
+
+https://blogs.msdn.microsoft.com/jpsanders/2009/05/20/understanding-maxservicepointidletime-and-defaultconnectionlimit/
+
+https://stackoverflow.com/questions/30248007/azure-eventprocessorhost-and-worker-role
+
+https://blogs.msdn.microsoft.com/kaevans/2015/02/24/scaling-azure-event-hubs-processing-with-worker-roles/
+
+https://www.hangfire.io/overview.html
 
 https://damienbod.com/2013/11/05/using-signalr-with-unity/
 
