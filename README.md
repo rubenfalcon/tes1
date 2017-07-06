@@ -1,4 +1,5 @@
 # 
+https://alexandrebrisebois.wordpress.com/2013/09/05/windows-azure-service-bus-web-api-a-match-made-in-heaven/
 
 https://docs.microsoft.com/en-us/azure/iot-suite/iot-solution-get-started
 
