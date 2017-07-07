@@ -1,5 +1,7 @@
 # 
 
+https://dzimchuk.net/event-correlation-in-application-insights/
+
 https://github.com/geffzhang/AspNetPerformanceMetrics/blob/master/AspNetPerformance/WebApiPerformanceAttribute.cs
 
 https://www.simple-talk.com/dotnet/net-performance/building-performance-metrics-into-asp-net-mvc-applications/
