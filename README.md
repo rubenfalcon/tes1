@@ -1,5 +1,7 @@
 # 
 
+https://dzimchuk.net/event-correlation-in-application-insights/
+
 jonjoli
 quinua
 tofu
