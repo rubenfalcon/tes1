@@ -1,5 +1,7 @@
 # 
 
+https://stackify.com/aspnet-mvc-error-handling/
+
 https://weblogs.asp.net/nmarun/asp-net-mvc-extendable-hooks-controlleractioninvoker-class
 
 https://dzimchuk.net/event-correlation-in-application-insights/
