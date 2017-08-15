@@ -1,5 +1,9 @@
 # 
 
+https://www.codota.com/android/methods/android.os.Vibrator/vibrate
+
+https://www.codota.com/android/classes/android.os.Vibrator
+
 https://stackify.com/aspnet-mvc-error-handling/
 
 https://weblogs.asp.net/nmarun/asp-net-mvc-extendable-hooks-controlleractioninvoker-class
