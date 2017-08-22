@@ -1,5 +1,7 @@
 # 
 
+https://stackoverflow.com/questions/43635994/retrieve-location-from-firebase-and-put-marker-on-google-map-api-for-android
+
 https://firebase.google.com/docs/database/android/lists-of-data
 
 https://firebase.google.com/docs/database/android/read-and-write#listen_for_value_events
