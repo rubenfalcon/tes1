@@ -1,5 +1,7 @@
 # 
 
+https://developer.android.com/training/location/geofencing.html
+
 https://www.codota.com/android/methods/android.os.Vibrator/vibrate
 
 https://www.codota.com/android/classes/android.os.Vibrator
