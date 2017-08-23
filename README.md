@@ -1,4 +1,9 @@
 # 
+
+https://github.com/firebase/geofire-java
+
+https://codexample.org/questions/569959/geofire-putting-another-marker-on-the-source-location-if-no-user-is-found-nearby.c
+
 https://stackoverflow.com/questions/42601587/querying-nearby-locations-with-geofire
 
 https://github.com/firebase/geofire-java
