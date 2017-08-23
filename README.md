@@ -1,4 +1,5 @@
 # 
+https://stackoverflow.com/questions/42601587/querying-nearby-locations-with-geofire
 
 https://github.com/firebase/geofire-java
 
