@@ -1,5 +1,9 @@
 # 
 
+https://github.com/firebase/geofire-java
+
+https://firebase.googleblog.com/2014/08/geofire-goes-mobile.html
+
 https://stackoverflow.com/questions/43635994/retrieve-location-from-firebase-and-put-marker-on-google-map-api-for-android
 
 https://firebase.google.com/docs/database/android/lists-of-data
