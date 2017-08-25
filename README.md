@@ -1,5 +1,7 @@
 # 
 
+https://github.com/thangchung/magazine-website-akka/tree/master/src/Cik.Magazine.ApiGateway
+
 https://github.com/firebase/geofire-java
 
 https://codexample.org/questions/569959/geofire-putting-another-marker-on-the-source-location-if-no-user-is-found-nearby.c
