@@ -1,5 +1,11 @@
 # 
 
+Please see the URL of the video we saw today:
+https://www.youtube.com/watch?v=1esyYzebVoA
+
+In addition, you can find this guide to set your role (potential) and goals
+https://quickstart.the5choices.com/files/roles-and-goals.pdf
+
 https://github.com/thangchung/magazine-website-akka/tree/master/src/Cik.Magazine.ApiGateway
 
 https://github.com/firebase/geofire-java
