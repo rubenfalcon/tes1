@@ -1,0 +1,48 @@
+class Program
+    {
+        private static IBus _bus;
+
+        static void Main(string[] args)
+        {
+            var recordedEvents = new ConcurrentQueue<string>();
+            var network = new InMemNetwork();
+            
+            _bus = StartBus(network, "inputqueue", recordedEvents);
+
+            _bus.SendLocal(new DeviceMessage() { Name = "ruben" });
+
+            Thread.Sleep(500);
+
+            var t = recordedEvents.Count;
+
+            Console.ReadLine();
+        }
+
+        static IBus StartBus(InMemNetwork network, string queueName, ConcurrentQueue<string> recordedEvents)
+        {
+            var activator = new BuiltinHandlerActivator();
+
+            activator.Register<DeviceMessageHandler>((b, c) => new DeviceMessageHandler(b));
+
+            return Configure.With(activator)
+                .Transport(t => t.UseInMemoryTransport(network, queueName))
+                .Options(o =>
+                {
+                    o.SimpleRetryStrategy(errorQueueAddress: "somewhere_else", maxDeliveryAttempts: 3);
+                    o.SetNumberOfWorkers(10);
+                    o.SetMaxParallelism(10);
+                    o.Decorate(c =>
+                    {
+                        var events = c.Get<BusLifetimeEvents>();
+
+                        events.BusStarting += () => recordedEvents.Enqueue("Bus starting");
+                        events.BusStarted += () => recordedEvents.Enqueue("Bus started");
+                        events.BusDisposing += () => recordedEvents.Enqueue("Bus disposing");
+                        events.BusDisposed += () => recordedEvents.Enqueue("Bus disposed");
+
+                        return events;
+                    });
+                })
+                .Start();            
+        }
+    }
