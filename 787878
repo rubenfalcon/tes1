@@ -1,3 +1,6 @@
+
+https://bytefish.de/blog/token_authentication_owin_nancy/
+
 class Program
     {
         private static IBus _bus;
