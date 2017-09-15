@@ -1,3 +1,10 @@
+https://stackoverflow.com/questions/1038466/logging-raw-http-request-response-in-asp-net-mvc-iis7
+https://lbadri.wordpress.com/2013/08/03/owin-authentication-middleware-for-hawk-in-thinktecture-identitymodel-45/
+https://stackoverflow.com/questions/25584626/response-body-for-request-response-logging
+https://stackoverflow.com/questions/32332028/owin-middleware-to-correlate-and-log-requests-and-responses
+https://www.strathweb.com/2014/03/per-request-tracing-asp-net-web-api/
+
+
 using Microsoft.Owin;
 using System;
 using System.Collections.Generic;
