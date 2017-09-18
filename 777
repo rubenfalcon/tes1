@@ -1,3 +1,7 @@
+http://dhickey.ie/2014/02/bubbling-exceptions-in-nancy-up-the-owin-pipeline/
+https://github.com/alhardy/AppMetrics.Owin/blob/master/src/App.Metrics.Extensions.Owin/Middleware/PerRequestTimerMiddleware.cs
+https://github.com/AppMetrics/Samples/blob/master/src/Web.Api.Net452/Startup.cs
+https://gist.github.com/psantiago32/107b0a180ba928071d77eac76ad8d6c8
 https://stackoverflow.com/questions/1038466/logging-raw-http-request-response-in-asp-net-mvc-iis7
 https://lbadri.wordpress.com/2013/08/03/owin-authentication-middleware-for-hawk-in-thinktecture-identitymodel-45/
 https://stackoverflow.com/questions/25584626/response-body-for-request-response-logging
