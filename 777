@@ -8,6 +8,7 @@ https://stackoverflow.com/questions/25584626/response-body-for-request-response-
 https://stackoverflow.com/questions/32332028/owin-middleware-to-correlate-and-log-requests-and-responses
 https://www.strathweb.com/2014/03/per-request-tracing-asp-net-web-api/
 https://docs.influxdata.com/influxdb/v1.3/guides/writing_data/
+https://blog.getseq.net/smart-logging-middleware-for-asp-net-core/
 
 
 using Microsoft.Owin;
