@@ -1,3 +1,6 @@
+https://bytefish.de/blog/consistent_error_handling_with_nancy/
+http://www.simoncropp.com/httpcompressionwithnancyfx
+
 http://dhickey.ie/2014/02/bubbling-exceptions-in-nancy-up-the-owin-pipeline/
 https://github.com/alhardy/AppMetrics.Owin/blob/master/src/App.Metrics.Extensions.Owin/Middleware/PerRequestTimerMiddleware.cs
 https://github.com/AppMetrics/Samples/blob/master/src/Web.Api.Net452/Startup.cs
