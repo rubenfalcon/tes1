@@ -1,5 +1,7 @@
 # 
 
+http://mac-blog.org.ua/dotnet-core-firebase-jwt/
+
 Please see the URL of the video we saw today:
 https://www.youtube.com/watch?v=1esyYzebVoA
 
