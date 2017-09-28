@@ -71,34 +71,6 @@ NIST
 PCI DSS
 SSAE 16&18
 
-
-Team,
- 
-Our customers count on us every day to deliver world-class products and services that will enable their transformation in the digital economy. As part of our path to growth, I’m pleased to introduce an improved process designed to transform how we deliver our Professional, Integration, Life cycle and all custom labor Services end-to-end.  In collaboration with our Business Transformation team; and under the leadership of Mike Bickel and Arun Kundu, we are rolling out this new initiative over the course of the next few weeks.
- 
-Today, our current service delivery model for custom labor Services involves four different processes which have created a fragmented customer experience. We are collapsing those disjointed processes into one simplified standard delivery model that we will leverage globally. 
- 
-Again, this new and improved process only applies to our Professional, Integration, Life cycle and custom labor Services.  Our standard labor services which are normally included in the price of a product we sell are not impacted. 
- 
-Here’s how our stakeholders will benefit.
- 
-•	Our Employees: Enable one quote, one contract, and one bill for all custom labor Services proposed and ordered, driving out variability, confusion, and inconsistent processes that currently exist. 
-•	Our Customers: Deliver faster quotes in a common format, a simple contract, a clear bill and coordinated delivery.
-•	Our business: Improve our reporting capabilities and ultimately drive revenue growth and profitability –better positioning VES in a very competitive global market.
- 
-Now that’s positive change!
- 
-So what’s next? 
-The first phase goes live on July 17.  If this initiative changes your day-to-day work activities, you will receive information about training and support in the coming days.  Be sure to complete your role-specific training before July 17th, as opportunities will begin routing in a new way on that date.  
- 
-Additional communication will be provided to keep you updated along the way.  You’ll also have the opportunity to obtain additional information from CrowdAround.  
- 
-I look forward to your continued support and efforts as we drive this change forward.
- 
-George
-
-
-
 https://dzimchuk.net/event-correlation-in-application-insights/
 
 https://github.com/geffzhang/AspNetPerformanceMetrics/blob/master/AspNetPerformance/WebApiPerformanceAttribute.cs
