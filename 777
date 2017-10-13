@@ -3,6 +3,7 @@ https://www.narwhl.com/narwhl-maturity-model/
 https://github.com/serilog/serilog-sinks-periodicbatching/blob/dev/src/Serilog.Sinks.PeriodicBatching/Sinks/PeriodicBatching/BatchedConnectionStatus.cs
 https://github.com/ASP-NET-MVC/aspnetwebstack/blob/master/src/System.Web.Http.Owin/WebApiAppBuilderExtensions.cs
 http://www.hackered.co.uk/articles/asp-net-mvc-creating-an-oauth-client-credentials-grant-type-token-endpoint
+http://dhickey.ie/2014/02/bubbling-exceptions-in-nancy-up-the-owin-pipeline/
 
 https://github.com/rohit5ram/carjoin/blob/master/app/src/main/java/com/pr/carjoin/activities/MainActivity.java
 https://github.com/marcinbudny/applicationinsights-owinextensions/tree/develop/src
