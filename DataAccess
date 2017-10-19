@@ -1,0 +1,1979 @@
+//===============================================================================
+// TSS
+// Data Access Helper
+// Version	: 1.0
+// Author	: Eduardo Sarmiento
+//            Angel Caro
+// Contact	: esarmiento@tss.com.pe
+//===============================================================================
+
+using System;
+using System.Text;
+using System.Data;
+using System.Threading;
+using System.Collections;
+using System.Collections.Specialized;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Data.SqlClient;
+using System.Data.OracleClient;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+
+using Microsoft.Practices.EnterpriseLibrary.Data;
+using Microsoft.Practices.EnterpriseLibrary.Data.Sql;
+using Microsoft.Practices.EnterpriseLibrary.Data.Oracle;
+using Microsoft.Practices.EnterpriseLibrary.Common.Configuration;
+
+namespace TSS.CSAV.Framework.DAL
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class DataAccess
+    {
+        #region Especial Types
+
+        protected enum DataOperationType
+        {
+            Insert = 0,
+            Update = 1,
+            Delete = 2
+        }
+
+        #endregion
+
+        #region Auditing Constants
+
+        private const string DEFAULTAUDITINGLOGDATATABLENAME = "auditing_log";
+
+        private const string DEFAULTAUDITINGLOGCOLSENTENCE = "command_executed";
+
+        #endregion
+
+        #region DataAccess Constants
+
+        private const int DEFAULTUPDATEBATCHSIZE = 20;
+
+        #endregion
+
+        #region Command Constants
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const int DEFAULTEXECUTIONCOMMANDTIMEOUT = 1200;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string DEFAULTRANSACTIONISOLATION = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED; ";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string SETANSIWARNINGSCOMMAND = "SET ANSI_WARNINGS OFF; ";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const char DEFAULTTOKENITEMSLISTSEPARATOR = ';';
+
+        #endregion
+
+        #region Singleton
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private static readonly DataAccess instance = new DataAccess();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private DataAccess()
+        {
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static DataAccess GetInstance()
+        {
+            return instance;
+        }
+
+        #endregion
+
+        #region Database
+
+        private static Mutex _dbmu = new Mutex();
+        private static Hashtable _db = new Hashtable();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="alias"></param>
+        /// <returns></returns>
+        //public Database GetDataBase(String alias)
+        //{
+        //    try
+        //    {
+        //        if (_db.Contains(alias) && _db[alias] != null)
+        //            return (Database)_db[alias];
+        //        else
+        //        {
+        //            Database db;
+        //            _dbmu.WaitOne();
+        //            try
+        //            {
+        //                db = DatabaseFactory.CreateDatabase(alias);                        
+        //                //db.DefaultCommandTimeout = Convert.ToInt32(ConfigurationSettings.AppSettings["DefaultCommandTimeout"]);
+        //                if (!_db.Contains(alias))
+        //                {
+        //                    _db.Add(alias, db);
+        //                }
+        //            }
+        //            finally
+        //            {
+        //                _dbmu.ReleaseMutex();
+        //            }
+        //            return db;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="alias"></param>
+        ///// <param name="configfileName"></param>
+        ///// <returns></returns>
+        //public Database GetDataBase(String alias, String configfileName)
+        //{
+        //    try
+        //    {
+        //        if (_db.Contains(alias) && _db[alias] != null)
+        //            return (Database)_db[alias];
+        //        else
+        //        {
+        //            Database db;
+        //            _dbmu.WaitOne();
+        //            try
+        //            {
+        //                IConfigurationSource ConfigContext = new FileConfigurationSource(configfileName);
+        //                DatabaseProviderFactory DBFactory = new DatabaseProviderFactory(ConfigContext);                       
+        //                db = DBFactory.Create(alias);
+        //                if (!_db.Contains(alias))
+        //                {
+        //                    _db.Add(alias, db);
+        //                }
+        //            }
+        //            finally
+        //            {
+        //                _dbmu.ReleaseMutex();
+        //            }
+        //            return db;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
+        public Database GetDataBase(String alias)
+        {
+            try
+            {
+                //if (_db.Contains(alias) && _db[alias] != null)
+                //    return (Database)_db[alias];
+                //else
+                //{
+                //    Database db;
+                //    _dbmu.WaitOne();
+                //    try
+                //    {
+                //        db = DatabaseFactory.CreateDatabase(alias);
+                //        //db.DefaultCommandTimeout = Convert.ToInt32(ConfigurationSettings.AppSettings["DefaultCommandTimeout"]);
+                //        if (!_db.Contains(alias))
+                //        {
+                //            _db.Add(alias, db);
+                //        }
+                //    }
+                //    finally
+                //    {
+                //        _dbmu.ReleaseMutex();
+                //    }
+                //    return db;
+                //}
+
+                _dbmu.WaitOne();
+                Database db;
+                db = DatabaseFactory.CreateDatabase(alias);
+                return db;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                _dbmu.ReleaseMutex();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="alias"></param>
+        /// <param name="configfileName"></param>
+        /// <returns></returns>
+        public Database GetDataBase(String alias, String configfileName)
+        {
+            try
+            {
+                //if (_db.Contains(alias) && _db[alias] != null)
+                //    return (Database)_db[alias];
+                //else
+                //{
+                //    Database db;
+                //    _dbmu.WaitOne();
+                //    try
+                //    {
+                //        IConfigurationSource ConfigContext = new FileConfigurationSource(configfileName);
+                //        DatabaseProviderFactory DBFactory = new DatabaseProviderFactory(ConfigContext);
+                //        db = DBFactory.Create(alias);
+                //        if (!_db.Contains(alias))
+                //        {
+                //            _db.Add(alias, db);
+                //        }
+                //    }
+                //    finally
+                //    {
+                //        _dbmu.ReleaseMutex();
+                //    }
+                //    return db;
+                //}
+
+                _dbmu.WaitOne();
+                Database db;
+                IConfigurationSource ConfigContext = new FileConfigurationSource(configfileName);
+                DatabaseProviderFactory DBFactory = new DatabaseProviderFactory(ConfigContext);
+                db = DBFactory.Create(alias);
+                return db;
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                _dbmu.ReleaseMutex();
+            }
+        }
+
+        #endregion
+
+        #region Metadata
+
+        struct TableCommand
+        {
+            public IDbDataAdapter Adapter;
+            public DbCommandBuilder CommandBuilder;
+        }
+
+        private Mutex _metadatamu = new Mutex();
+        private DataSet _metadata = new DataSet();
+        private Dictionary<String, TableCommand> _commandsmetadata = new Dictionary<String, TableCommand>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="tablename"></param>
+        /// <returns></returns>
+        public IDbDataAdapter GetTableAdapter(Database db, String tablename)
+        {
+            tablename = tablename.ToLower();
+            if (!_commandsmetadata.ContainsKey(tablename) || (object)_commandsmetadata[tablename] == null)
+                GetTableMetadata(db, tablename);
+            return (IDbDataAdapter)_commandsmetadata[tablename].Adapter;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="tablename"></param>
+        /// <returns></returns>
+        public DbCommandBuilder GetTableCommandBuilder(Database db, String tablename)
+        {
+            tablename = tablename.ToLower();
+            if (!_commandsmetadata.ContainsKey(tablename) || (object)_commandsmetadata[tablename] == null)
+                GetTableMetadata(db, tablename);
+            return _commandsmetadata[tablename].CommandBuilder;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="tablename"></param>
+        /// <returns></returns>
+        public DataTable GetTableMetadata(Database db, String tablename)
+        {
+            try
+            {
+                tablename = tablename.ToLower();
+                if (_metadata.Tables.Contains(tablename) && _metadata.Tables[tablename] != null)
+                    //return (DataTable)_metadata.Tables[tablename];
+                    return (DataTable)_metadata.Tables[tablename].Copy();
+                else
+                {
+                    DataTable output = null;
+                    DataSet ds = new DataSet();
+                    DbDataAdapter da = db.GetDataAdapter();
+                    DbCommandBuilder cmdb = null;
+
+                    _metadatamu.WaitOne();
+                    try
+                    {
+                        using (IDbConnection connection = db.CreateConnection())
+                        {
+                            try
+                            {
+                                connection.Open();
+
+                                if (db is OracleDatabase)
+                                {
+                                    ((IDbDataAdapter)da).SelectCommand = db.GetSqlStringCommand(String.Format("SELECT * FROM {0} (nolock) WHERE ROWNUM < 1", tablename));
+                                }
+                                else if (db is SqlDatabase)
+                                {
+                                    ((IDbDataAdapter)da).SelectCommand = (SqlCommand)db.GetSqlStringCommand(String.Format("SET FMTONLY ON SELECT TOP 0 * FROM {0} (nolock) SET FMTONLY OFF", tablename));
+                                }
+                                ((IDbDataAdapter)da).SelectCommand.Connection = connection;
+
+                                da.FillSchema(ds, SchemaType.Source, tablename);
+
+
+                                if (db is OracleDatabase)
+                                {
+                                    cmdb = new OracleCommandBuilder((OracleDataAdapter)da);
+                                    //((OracleDataAdapter)da).InsertCommand = cmdb.GetInsertCommand();
+                                    //((OracleDataAdapter)da).UpdateCommand = cmdb.GetUpdateCommand();
+                                    //((OracleDataAdapter)da).DeleteCommand = cmdb.GetDeleteCommand();
+                                }
+                                else if (db is SqlDatabase)
+                                {
+                                    cmdb = new SqlCommandBuilder((SqlDataAdapter)da);
+                                    //((SqlDataAdapter)da).InsertCommand = cmdb.GetInsertCommand();
+                                    //((SqlDataAdapter)da).InsertCommand.CommandTimeout = db.DefaultCommandTimeout;
+                                    //((SqlDataAdapter)da).UpdateCommand = cmdb.GetUpdateCommand();
+                                    //((SqlDataAdapter)da).UpdateCommand.CommandTimeout = db.DefaultCommandTimeout;
+                                    //((SqlDataAdapter)da).DeleteCommand = cmdb.GetDeleteCommand();
+                                    //((SqlDataAdapter)da).DeleteCommand.CommandTimeout = db.DefaultCommandTimeout;
+                                }
+                            }
+                            finally
+                            {
+                                if (connection.State == ConnectionState.Open) connection.Close();
+                            }
+                        }
+
+                        if (ds != null && ds.Tables.Count > 0)
+                        {
+                            if (!_metadata.Tables.Contains(tablename))
+                            {
+                                _commandsmetadata.Add(tablename, new TableCommand() { Adapter = da, CommandBuilder = cmdb });
+                            }
+                            output = ds.Tables[0];
+                            _metadata.Merge(output);
+                        }
+                    }
+                    finally
+                    {
+                        _metadatamu.ReleaseMutex();
+                    }
+
+                    //return output;
+                    return output.Copy();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="tablename"></param>
+        /// <returns></returns>
+        private TableCommand GetTableComponents(Database db, String tablename)
+        {
+            TableCommand resultComponents = new TableCommand();
+
+            try
+            {
+                tablename = tablename.ToLower();
+
+                //DataTable output = null;
+                //DataSet ds = new DataSet();
+                DbDataAdapter da = db.GetDataAdapter();
+                DbCommandBuilder cmdb = null;
+
+                using (IDbConnection connection = db.CreateConnection())
+                {
+                    try
+                    {
+                        connection.Open();
+
+                        if (db is OracleDatabase)
+                        {
+                            ((IDbDataAdapter)da).SelectCommand = db.GetSqlStringCommand(String.Format("SELECT * FROM {0} (nolock) WHERE ROWNUM < 1", tablename));
+                            ((IDbDataAdapter)da).SelectCommand.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+                        }
+                        else if (db is SqlDatabase)
+                        {
+                            ((IDbDataAdapter)da).SelectCommand = (SqlCommand)db.GetSqlStringCommand(String.Format("SET FMTONLY ON SELECT TOP 0 * FROM {0} (nolock) SET FMTONLY OFF", tablename));
+                            ((IDbDataAdapter)da).SelectCommand.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+                        }
+                        ((IDbDataAdapter)da).SelectCommand.Connection = connection;
+
+                        //da.FillSchema(ds, SchemaType.Source, tablename);
+
+                        if (db is OracleDatabase)
+                        {
+                            cmdb = new OracleCommandBuilder((OracleDataAdapter)da);
+                        }
+                        else if (db is SqlDatabase)
+                        {
+                            cmdb = new SqlCommandBuilder((SqlDataAdapter)da);
+                        }
+                    }
+                    finally
+                    {
+                        if (connection.State == ConnectionState.Open) connection.Close();
+                    }
+                }
+
+                //if (ds != null && ds.Tables.Count > 0)
+                //{
+                    resultComponents.Adapter = da;
+                    resultComponents.CommandBuilder = cmdb;
+                //}
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return resultComponents;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="tablenames"></param>
+        /// <returns></returns>
+        public DataSet GetTableMetadata(Database db, String[] tablenames)
+        {
+            DataSet output = new DataSet();
+            foreach (String tablename in tablenames)
+            {
+                DataTable table = GetTableMetadata(db, tablename);
+                if (table != null)
+                    output.Merge(table);
+            }
+            //return output;
+            return output.Copy();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public List<String> GetTablePKColumnsNames(Database DB, String tableName)
+        {
+            List<String> output = new List<String>();
+            DataTable table = GetTableMetadata(DB, tableName);
+            foreach (DataColumn column in table.PrimaryKey)
+            {
+                output.Add(column.ColumnName);
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public List<String> GetTableNotPKColumnsNames(Database DB, String tableName)
+        {
+            List<String> output = new List<String>();
+            DataTable table = GetTableMetadata(DB, tableName);
+            List<DataColumn> PKColumns = new List<DataColumn>(table.PrimaryKey);
+            foreach (DataColumn column in table.Columns)
+            {
+                if (!PKColumns.Contains(column))
+                    output.Add(column.ColumnName);
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public List<String> GetTableAllColumnsNames(Database DB, String tableName)
+        {
+            return GetTableAllColumnsNames(DB, tableName, null);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="excludedColumns"></param>
+        /// <returns></returns>
+        public List<String> GetTableAllColumnsNames(Database DB, String tableName, List<String> excludedColumns)
+        {
+            List<String> output = new List<String>();
+            DataTable table = GetTableMetadata(DB, tableName);
+            foreach (DataColumn column in table.Columns)
+            {
+                if (excludedColumns == null || (excludedColumns != null && !excludedColumns.Contains(column.ColumnName)))
+                    output.Add(column.ColumnName);
+            }
+            return output;
+        }
+        
+        #endregion
+
+        #region Maintenance
+
+        #region Auditing Log Methods
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static string QuoteValue(Object value)
+        {
+            string quoteString = "";
+
+            if (value == DBNull.Value || value == null)
+            {
+                quoteString = "NULL";
+            }
+            else
+            {
+                if (value.GetType() == typeof(string))
+                    quoteString = string.Format("'{0}'", value.ToString().Replace("'", "''"));
+                else
+                    if (value.GetType() == typeof(DateTime))
+                        quoteString = string.Format("'{0}'", ((DateTime)value).ToString("G", DateTimeFormatInfo.InvariantInfo));
+                    else
+                        quoteString = string.Format("{0}", value.ToString());
+            }
+
+            return quoteString;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private static DataTable CreateAuditingLogTable()
+        {
+            DataTable auditingLog = new DataTable(DEFAULTAUDITINGLOGDATATABLENAME);
+            auditingLog.Columns.Add(new DataColumn(DEFAULTAUDITINGLOGCOLSENTENCE, typeof(string)));
+
+            return auditingLog.Copy();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="auditingLog"></param>
+        /// <param name="command"></param>
+        private static void InsertLogInformation(DataTable auditingLog, DbCommand command)
+        {
+            DataRow log = auditingLog.NewRow();
+
+            string sentence = command.CommandText;
+
+            for (int i = 0; i < command.Parameters.Count; i++)
+            {
+                sentence = DataTypeHelper.ReplaceOnlyFirst(sentence, command.Parameters[i].ParameterName, QuoteValue(command.Parameters[i].Value));
+            }
+
+            log[DEFAULTAUDITINGLOGCOLSENTENCE] = sentence;
+            auditingLog.Rows.Add(log);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void OnSqlRowUpdated(object sender, SqlRowUpdatedEventArgs e)
+        {
+            DataSet data = e.Row.Table.DataSet;
+            DataTable auditingLog = data.Tables[DEFAULTAUDITINGLOGDATATABLENAME];
+
+            InsertLogInformation(auditingLog, e.Command);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void OnOracleRowUpdated(object sender, OracleRowUpdatedEventArgs e)
+        {
+            DataSet data = e.Row.Table.DataSet;
+            DataTable auditingLog = data.Tables[DEFAULTAUDITINGLOGDATATABLENAME];
+
+            InsertLogInformation(auditingLog, e.Command);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="auditingLogList"></param>
+        private static void FillResultAuditingLogList(DataSet input, List<String> auditingLogList)
+        {
+            if (input != null && input.Tables.Contains(DEFAULTAUDITINGLOGDATATABLENAME))
+            {
+                foreach (DataRow itemLog in input.Tables[DEFAULTAUDITINGLOGDATATABLENAME].Rows)
+                {
+                    auditingLogList.Add(DataTypeHelper.GetString(itemLog[DEFAULTAUDITINGLOGCOLSENTENCE]));
+                }
+            }
+        }
+
+        #endregion
+
+        #region UpdateOperation
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="input"></param>
+        /// <param name="updateMode"></param>
+        /// <param name="optimisticUpdate"></param>
+        /// <param name="saveLog"></param>
+        private void UpdateOperation(Database db, DataSet input, DataUpdateMode updateMode, bool optimisticUpdate, bool saveLog)
+        {
+            if (input != null)
+            {
+                if (saveLog)
+                {
+                    input.Tables.Add(CreateAuditingLogTable());
+                }
+
+                for (int i = input.Tables.Count - 1; i >= 0; i--)
+                {
+                    if (!input.Tables[i].TableName.Equals(DEFAULTAUDITINGLOGDATATABLENAME))
+                    {
+                        TableCommand tableComponents = GetTableComponents(db, input.Tables[i].TableName);
+                        IDbDataAdapter da = tableComponents.Adapter;
+                        DbCommandBuilder cmdb = tableComponents.CommandBuilder;
+
+                        try
+                        {
+                            cmdb.ConflictOption = optimisticUpdate ? ConflictOption.CompareAllSearchableValues : ConflictOption.OverwriteChanges;
+                            cmdb.SetAllValues = (updateMode == DataUpdateMode.ByRow);
+                            da.SelectCommand.Connection = db.CreateConnection();
+
+                            // add handlers
+                            object updatedEventHandler = null;
+                            if (saveLog)
+                            {
+                                if (db is SqlDatabase)
+                                {
+                                    updatedEventHandler = new SqlRowUpdatedEventHandler(OnSqlRowUpdated);
+                                    ((SqlDataAdapter)da).RowUpdated += (SqlRowUpdatedEventHandler)updatedEventHandler;
+                                    //((SqlDataAdapter)da).RowUpdated += new SqlRowUpdatedEventHandler(OnSqlRowUpdated);
+                                }
+                                else if (db is OracleDatabase)
+                                {
+                                    updatedEventHandler = new OracleRowUpdatedEventHandler(OnOracleRowUpdated);
+                                    ((OracleDataAdapter)da).RowUpdated += (OracleRowUpdatedEventHandler)updatedEventHandler;
+                                    //((OracleDataAdapter)da).RowUpdated += new OracleRowUpdatedEventHandler(OnOracleRowUpdated);
+                                }
+                            }
+
+                            if (da.SelectCommand.Connection.State == ConnectionState.Closed)
+                                da.SelectCommand.Connection.Open();
+
+                            SetAnsiWarnings(db, da.SelectCommand.Connection, false);
+
+                            // update, this operation fires two events 
+                            // (RowUpdating/RowUpdated) per changed row 
+                            //((DbDataAdapter)da).SelectCommand.UpdatedRowSource = UpdateRowSource.None;
+                            //((DbDataAdapter)da).UpdateBatchSize = DEFAULTUPDATEBATCHSIZE;
+                            ((DbDataAdapter)da).Update(input, input.Tables[i].TableName);
+
+                            if (da.SelectCommand.Connection.State == ConnectionState.Open)
+                                da.SelectCommand.Connection.Close();
+
+                            // remove handlers
+                            if (saveLog)
+                            {
+                                if (db is SqlDatabase)
+                                {
+                                    ((SqlDataAdapter)da).RowUpdated -= (SqlRowUpdatedEventHandler)updatedEventHandler;
+                                    //((SqlDataAdapter)da).RowUpdated -= new SqlRowUpdatedEventHandler(OnSqlRowUpdated);
+                                }
+                                else if (db is OracleDatabase)
+                                {
+                                    ((OracleDataAdapter)da).RowUpdated -= (OracleRowUpdatedEventHandler)updatedEventHandler;
+                                    //((OracleDataAdapter)da).RowUpdated -= new OracleRowUpdatedEventHandler(OnOracleRowUpdated);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            if (da.SelectCommand.Connection.State == ConnectionState.Open)
+                                da.SelectCommand.Connection.Close();
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region ApplyUpdates
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="input"></param>
+        public void ApplyUpdates(Database db, DataTable input)
+        {
+            DataSet data = new DataSet();
+            data.Tables.Add(input.Copy());
+            ApplyUpdates(db, data);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="input"></param>
+        public void ApplyUpdates(Database db, DataSet input)
+        {
+            ApplyUpdates(db, input, DataUpdateMode.ByRow, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="input"></param>
+        /// <param name="updateMode"></param>
+        public void ApplyUpdates(Database db, DataSet input, DataUpdateMode updateMode)
+        {
+            ApplyUpdates(db, input, updateMode, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="input"></param>
+        /// <param name="saveLog"></param>
+        /// <returns></returns>
+        public List<String> ApplyUpdates(Database db, DataSet input, bool saveLog)
+        {
+            return ApplyUpdates(db, input, DataUpdateMode.ByRow, saveLog);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="input"></param>
+        /// <param name="updateMode"></param>
+        /// <param name="saveLog"></param>
+        /// <returns></returns>
+        public List<String> ApplyUpdates(Database db, DataSet input, DataUpdateMode updateMode, bool saveLog)
+        {
+            if (db == null) throw new ArgumentNullException("db");
+            if (input == null) throw new ArgumentNullException("input");
+
+            List<String> auditingLogList = new List<String>();
+
+            if (!input.HasChanges()) return auditingLogList;
+
+            try
+            {
+                input.EnforceConstraints = false;
+                DataSet datadelete = input.GetChanges(DataRowState.Deleted);
+                DataSet datainsert = input.GetChanges(DataRowState.Added);
+                DataSet dataupdate = input.GetChanges(DataRowState.Modified);
+
+                UpdateOperation(db, datadelete, updateMode, false, saveLog);
+                UpdateOperation(db, dataupdate, updateMode, false, saveLog);
+                UpdateOperation(db, datainsert, updateMode, false, saveLog);
+
+                input.EnforceConstraints = true;
+                input.AcceptChanges();
+
+                if (saveLog)
+                {
+                    FillResultAuditingLogList(datadelete, auditingLogList);
+                    FillResultAuditingLogList(datainsert, auditingLogList);
+                    FillResultAuditingLogList(dataupdate, auditingLogList);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return auditingLogList;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="connection"></param>
+        /// <param name="input"></param>
+        [Obsolete]
+        public void ApplyUpdates(Database db, IDbConnection connection, DataSet input)
+        {
+            if (db == null) throw new ArgumentNullException("db");
+            if (input == null) throw new ArgumentNullException("input");
+
+            if (!input.HasChanges()) return;
+            if (connection == null) connection = db.CreateConnection();
+
+            try
+            {
+                using (connection)
+                {
+                    connection.Open();
+                    IDbTransaction transaction = connection.BeginTransaction();
+                    try
+                    {
+                        input.EnforceConstraints = false;
+                        DataSet datadelete = input.GetChanges(DataRowState.Deleted);
+                        DataSet datainsert = input.GetChanges(DataRowState.Added);
+                        DataSet dataupdate = input.GetChanges(DataRowState.Modified);
+
+                        if (datadelete != null)
+                        {
+                            for (int i = datadelete.Tables.Count - 1; i >= 0; i--)
+                            {
+                                IDbDataAdapter da = GetTableAdapter(db, datadelete.Tables[i].TableName);
+                                da.InsertCommand.Connection = connection;
+                                da.InsertCommand.Transaction = transaction;
+                                da.UpdateCommand.Connection = connection;
+                                da.UpdateCommand.Transaction = transaction;
+                                da.DeleteCommand.Connection = connection;
+                                da.DeleteCommand.Transaction = transaction;
+                                ((DbDataAdapter)da).Update(datadelete, datadelete.Tables[i].TableName);
+                            }
+                        }
+
+                        if (dataupdate != null)
+                        {
+                            foreach (DataTable table in dataupdate.Tables)
+                            {
+                                IDbDataAdapter da = GetTableAdapter(db, table.TableName);
+                                da.InsertCommand.Connection = connection;
+                                da.InsertCommand.Transaction = transaction;
+                                da.UpdateCommand.Connection = connection;
+                                da.UpdateCommand.Transaction = transaction;
+                                da.DeleteCommand.Connection = connection;
+                                da.DeleteCommand.Transaction = transaction;
+                                ((DbDataAdapter)da).Update(dataupdate, table.TableName);
+                            }
+                        }
+
+                        if (datainsert != null)
+                        {
+                            foreach (DataTable table in datainsert.Tables)
+                            {
+                                IDbDataAdapter da = GetTableAdapter(db, table.TableName);
+                                da.InsertCommand.Connection = connection;
+                                da.InsertCommand.Transaction = transaction;
+                                da.UpdateCommand.Connection = connection;
+                                da.UpdateCommand.Transaction = transaction;
+                                da.DeleteCommand.Connection = connection;
+                                da.DeleteCommand.Transaction = transaction;
+                                ((DbDataAdapter)da).Update(datainsert, table.TableName);
+                            }
+                        }
+
+                        transaction.Commit();
+                        input.EnforceConstraints = true;
+                        input.AcceptChanges();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                    finally
+                    {
+                        if (connection.State == ConnectionState.Open) connection.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        #endregion
+
+        #region ExecuteSentences
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="sentencesList"></param>
+        public void ExecuteSentences(Database db, StringBuilder sentencesList)
+        {
+            ExecuteSentences(db, sentencesList.ToString(), false, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="sentencesList"></param>
+        /// <param name="defaultIsolationlevel"></param>
+        /// <param name="ansiWarning"></param>
+        public void ExecuteSentences(Database db, StringBuilder sentencesList, bool defaultIsolationlevel, bool ansiWarning)
+        {
+            ExecuteSentences(db, sentencesList.ToString(), defaultIsolationlevel, ansiWarning);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="sentencesList"></param>
+        public void ExecuteSentences(Database db, List<string> sentencesList)
+        {
+            ExecuteSentences(db, sentencesList.Join(" ", " ", DEFAULTTOKENITEMSLISTSEPARATOR), false, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="sentencesList"></param>
+        /// <param name="defaultIsolationlevel"></param>
+        /// <param name="ansiWarning"></param>
+        public void ExecuteSentences(Database db, List<string> sentencesList, bool defaultIsolationlevel, bool ansiWarning)
+        {
+            ExecuteSentences(db, sentencesList.Join(" ", " ", DEFAULTTOKENITEMSLISTSEPARATOR), defaultIsolationlevel, ansiWarning);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="sentences"></param>
+        /// <param name="defaultIsolationlevel"></param>
+        /// <param name="ansiWarning"></param>
+        public void ExecuteSentences(Database db, string sentences, bool defaultIsolationlevel, bool ansiWarning)
+        {
+            string commandText = string.Format("{0}{1}{2}", (defaultIsolationlevel) ? string.Format("{0} ", DEFAULTRANSACTIONISOLATION) : string.Empty,
+                                                            (ansiWarning) ? string.Format("{0} ", SETANSIWARNINGSCOMMAND) : string.Empty,
+                                                            sentences);
+            using (DbCommand command = db.GetSqlStringCommand(commandText))
+            {
+                using (DbConnection conn = db.CreateConnection())
+                {
+                    command.Connection = conn;
+                    command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+                    db.ExecuteNonQuery(command);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Generate SQL Sentences
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="parametersForInsert"></param>
+        /// <returns></returns>
+        public string GenerateInsertSentence(String tableName, IDictionary<string, object> parametersForInsert)
+        {
+            StringBuilder fieldsList = new StringBuilder();
+            StringBuilder fieldsParameters = new StringBuilder();
+
+            bool needToken = false;
+            foreach (string columName in parametersForInsert.Keys)
+            {
+                if (needToken)
+                {
+                    fieldsList.Append(", ");
+                    fieldsParameters.Append(", ");
+                }
+                fieldsList.AppendFormat("{0}", columName);
+                fieldsParameters.AppendFormat("{0}", QuoteValue(parametersForInsert[columName]));
+                needToken = true;
+            }
+
+            string insertSentence = string.Format("INSERT INTO {0} ({1}) VALUES({2})", tableName, fieldsList, fieldsParameters);
+
+            return insertSentence;
+        }
+
+        #endregion
+
+        #region Insert
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="parametersForInsert"></param>
+        public void Insert(Database DB, String tableName, IDictionary<string, object> parametersForInsert)
+        {
+            Insert(DB, tableName, parametersForInsert, false, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="parametersForInsert"></param>
+        /// <param name="saveLog"></param>
+        /// <returns></returns>
+        public string Insert(Database DB, String tableName, IDictionary<string, object> parametersForInsert, bool saveLog)
+        {
+            return Insert(DB, tableName, parametersForInsert, saveLog, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="parametersForInsert"></param>
+        /// <param name="saveLog"></param>
+        /// <param name="AnsWarnsOff"></param>
+        /// <returns></returns>
+        public string Insert(Database DB, String tableName, IDictionary<string, object> parametersForInsert, bool saveLog, bool AnsWarnsOff)
+        {
+            if ((parametersForInsert == null) || (DB == null) || (tableName == null))
+                throw new ArgumentNullException();
+
+            if ((parametersForInsert.Count == 0) || (tableName.Equals(string.Empty)))
+                throw new ArgumentException();
+
+            String sentence = string.Empty;
+
+            StringBuilder fieldsList = new StringBuilder();
+            StringBuilder fieldsParameters = new StringBuilder();
+
+            bool needToken = false;
+            foreach (string columName in parametersForInsert.Keys)
+            {
+                if (needToken) 
+                {
+                    fieldsList.Append(", ");
+                    fieldsParameters.Append(", ");
+                }             
+                fieldsList.AppendFormat("{0}", columName);
+                //fieldsParameters.AppendFormat("@{0}", columName);
+                fieldsParameters.AppendFormat("{0}", QuoteValue(parametersForInsert[columName]));
+                needToken = true;
+            }
+
+            string insertSentence = string.Format("INSERT INTO {0} ({1}) VALUES({2})", tableName, fieldsList, fieldsParameters);
+            if (saveLog)
+            {
+                sentence = insertSentence;
+            }            
+
+            if (AnsWarnsOff)
+            {
+                insertSentence = SETANSIWARNINGSCOMMAND + insertSentence;
+            }
+
+            insertSentence = DEFAULTRANSACTIONISOLATION + insertSentence;
+
+            DbCommand command = DB.GetSqlStringCommand(insertSentence);
+            try
+            {
+                command.Connection = DB.CreateConnection();
+                command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+                DB.ExecuteNonQuery(command);
+            }
+            finally
+            {
+                command = null;
+            }
+
+            return sentence;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="columnValues"></param>
+        [Obsolete]
+        public void Insert(Database DB, String tableName, Object[] columnValues)
+        {
+            Insert(DB, tableName, columnValues, false);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="columnValues"></param>
+        /// <param name="saveLog"></param>
+        [Obsolete]
+        public string Insert(Database DB, String tableName, Object[] columnValues, bool saveLog)
+        {
+            String sentence = string.Empty;
+
+            StringBuilder fieldsList = new StringBuilder();
+            StringBuilder fieldsParameters = new StringBuilder();
+
+            bool needToken = false;
+            List<string> fieldNames = this.GetTableAllColumnsNames(DB, tableName);
+            //int i = 0;
+            //foreach (string columName in fieldNames)
+            for (int i = 0; i < columnValues.Length; i++)
+            {
+                if (needToken)
+                {
+                    fieldsList.Append(", ");
+                    fieldsParameters.Append(", ");
+                }
+                //fieldsList.AppendFormat("{0}", columName);
+                fieldsList.AppendFormat("{0}", fieldNames[i]);
+                //fieldsParameters.AppendFormat("@{0}", columName);
+                fieldsParameters.AppendFormat("{0}", QuoteValue(columnValues[i]));
+                needToken = true;
+                //i++;
+            }
+
+            string insertSentence = string.Format("INSERT INTO {0} ({1}) VALUES({2})", tableName, fieldsList, fieldsParameters);
+            if (saveLog)
+            {
+                sentence = insertSentence;
+            }
+
+            insertSentence = DEFAULTRANSACTIONISOLATION + SETANSIWARNINGSCOMMAND + insertSentence;
+
+            DbCommand command = DB.GetSqlStringCommand(insertSentence);
+            try
+            {
+                command.Connection = DB.CreateConnection();
+                command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+                DB.ExecuteNonQuery(command);
+            }
+            finally
+            {
+                command = null;
+            }
+
+            return sentence;
+        }
+
+        #endregion
+
+        #region Update
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="parametersForUpdate"></param>
+        /// <param name="primaryKeyValues"></param>
+        public void Update(Database DB, String tableName, IDictionary<string, object> parametersForUpdate, object[] primaryKeyValues)
+        {
+            Update(DB, tableName, parametersForUpdate, primaryKeyValues, false, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="parametersForUpdate"></param>
+        /// <param name="primaryKeyValues"></param>
+        public string Update(Database DB, String tableName, IDictionary<string, object> parametersForUpdate, object[] primaryKeyValues, bool saveLog)
+        {
+            return Update(DB, tableName, parametersForUpdate, primaryKeyValues, saveLog, false);
+        }        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="parametersForUpdate"></param>
+        /// <param name="primaryKeyValues"></param>
+        /// <param name="saveLog"></param>
+        public string Update(Database DB, String tableName, IDictionary<string, object> parametersForUpdate, object[] primaryKeyValues, bool saveLog, bool AnsWarnsOff)
+        {
+            if ((parametersForUpdate == null) || (primaryKeyValues == null) || (DB == null) || (tableName == null))
+                throw new ArgumentNullException();
+
+            if ((parametersForUpdate.Count == 0) || (primaryKeyValues.Length == 0) || (tableName.Equals(string.Empty)))
+                throw new ArgumentException();
+
+            String sentence = String.Empty;
+            StringBuilder fieldsGroup = new StringBuilder();
+
+            bool needToken = false;
+            foreach (string columName in parametersForUpdate.Keys)
+            {
+                if (needToken) fieldsGroup.Append(", ");
+                //fieldsGroup.AppendFormat("{0} = @{1}", columName, columName);
+                fieldsGroup.AppendFormat("{0} = {1}", columName, QuoteValue(parametersForUpdate[columName]));
+                needToken = true;
+            }
+
+            StringBuilder conditionsGroup = new StringBuilder();
+
+            needToken = false;
+            List<string> primaryKeyColumns = this.GetTablePKColumnsNames(DB, tableName);
+            for (int i = 0; i < primaryKeyValues.Length; i++)
+            {
+                if (needToken) conditionsGroup.Append(" AND ");
+                //conditionsGroup.AppendFormat("({0} = @{1})", primaryKeyColumns[i], primaryKeyColumns[i]);
+                conditionsGroup.AppendFormat("({0} = {1})", primaryKeyColumns[i], QuoteValue(primaryKeyValues[i]));
+                needToken = true;
+            }
+
+            string updateSentence = string.Format("UPDATE {0} SET {1} WHERE {2}", tableName, fieldsGroup, conditionsGroup);
+
+            if (saveLog)
+            {
+                sentence = updateSentence;
+            }
+
+            if (AnsWarnsOff)
+            {
+                updateSentence = SETANSIWARNINGSCOMMAND + updateSentence;
+            }
+
+            updateSentence = DEFAULTRANSACTIONISOLATION + updateSentence;
+            DbCommand command = DB.GetSqlStringCommand(updateSentence);
+            try
+            {
+                command.Connection = DB.CreateConnection();
+                command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+
+                DB.ExecuteNonQuery(command);
+            }
+            finally
+            {
+                command = null;
+            }
+
+            return sentence;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="columnValues"></param>
+        [Obsolete]
+        public void Update(Database DB, String tableName, Object[] columnValues)
+        {
+            Update(DB, tableName, columnValues, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="columnValues"></param>
+        /// <param name="saveLog"></param>
+        [Obsolete]
+        public string Update(Database DB, String tableName, Object[] columnValues, bool saveLog)
+        {
+            String sentence = String.Empty;
+            DbCommandBuilder cmdb = GetTableCommandBuilder(DB, tableName);
+            cmdb.ConflictOption = ConflictOption.OverwriteChanges;
+            cmdb.SetAllValues = false;
+            cmdb.DataAdapter.SelectCommand.Connection = DB.CreateConnection();
+            DbCommand command = cmdb.GetUpdateCommand(true);
+            command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+
+            try
+            {
+                if (saveLog)
+                {
+                    sentence = command.CommandText;
+                }
+
+                int i = 0;
+                foreach (object paramValue in columnValues)
+                {
+                    command.Parameters[i].Value = paramValue;
+
+                    if (saveLog)
+                    {
+                        sentence = sentence.Replace(command.Parameters[i].ParameterName, QuoteValue(command.Parameters[i].Value));
+                    }
+
+                    i++;
+                }
+                command.CommandText = DEFAULTRANSACTIONISOLATION + command.CommandText;
+
+                DB.ExecuteNonQuery(command);
+
+                return sentence;
+            }
+            finally
+            {
+                command = null;
+            }
+        }
+
+        #endregion
+        
+        #region Delete
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="primaryKeyValues"></param>
+        public void Delete(Database DB, String tableName, Object[] primaryKeyValues)
+        {
+            Delete(DB, tableName, primaryKeyValues, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="primaryKeyValues"></param>
+        /// <param name="saveLog"></param>
+        public string Delete(Database DB, String tableName, Object[] primaryKeyValues, bool saveLog)
+        {
+            StringBuilder conditionsGroup = new StringBuilder();
+
+            bool needToken = false;
+            List<string> primaryKeyColumns = this.GetTablePKColumnsNames(DB, tableName);
+            for (int i = 0; i < primaryKeyValues.Length; i++)
+            {
+                if (needToken) conditionsGroup.Append(" AND ");
+                //conditionsGroup.AppendFormat("({0} = @{1})", primaryKeyColumns[i], primaryKeyColumns[i]);
+                conditionsGroup.AppendFormat("({0} = {1})", primaryKeyColumns[i], QuoteValue(primaryKeyValues[i]));
+                needToken = true;
+            }
+
+            String deleteSQLSentence = String.Format("DELETE {0} WHERE {1} ", tableName, conditionsGroup.ToString());
+
+            DbCommand command = DB.GetSqlStringCommand(DEFAULTRANSACTIONISOLATION + deleteSQLSentence);
+            try
+            {
+                command.Connection = DB.CreateConnection();
+                command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+
+                DB.ExecuteNonQuery(command);
+            }
+            finally
+            {
+                command = null;
+            }
+
+            return deleteSQLSentence;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="dataFilters"></param>
+        public void Delete(Database DB, String tableName, List<DataFilter> dataFilters)
+        {
+            Delete(DB, tableName, dataFilters, false);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="dataFilters"></param>
+        /// <param name="saveLog"></param>
+        public string Delete(Database DB, String tableName, List<DataFilter> dataFilters, bool saveLog)
+        {
+            String deleteSQLSentence = String.Format("DELETE {0} WHERE {1} ",
+                                                     tableName,
+                                                     DataFilterManager.BuildSQLServerFilterClauseString(dataFilters));
+
+            DbCommand command = DB.GetSqlStringCommand(DEFAULTRANSACTIONISOLATION + deleteSQLSentence);
+            try
+            {
+                command.Connection = DB.CreateConnection();
+                command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+
+                DB.ExecuteNonQuery(command);
+            }
+            finally
+            {
+                command = null;
+            }
+
+            return deleteSQLSentence;
+        }
+
+        #endregion
+
+        #region Alternative Maintenance
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="parametersForUpdate"></param>
+        /// <param name="keyFieldNames"></param>
+        public void UpdateEx(Database DB, String tableName, IDictionary<string, object> parametersForUpdate, string[] keyFieldNames)
+        {
+            UpdateEx(DB, tableName, parametersForUpdate, keyFieldNames, false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="parametersForUpdate"></param>
+        /// <param name="keyFieldNames"></param>
+        /// <param name="saveLog"></param>
+        /// <returns></returns>
+        public string UpdateEx(Database DB, String tableName, IDictionary<string, object> parametersForUpdate, string[] keyFieldNames, bool saveLog)
+        {
+            string updateSentence = "UPDATE {0} SET {1} WHERE {2} ";
+            StringBuilder setSection = null;
+            StringBuilder whereSection = null;
+
+            bool needToken = false;
+            setSection = new StringBuilder();
+            foreach (string columName in parametersForUpdate.Keys)
+            {
+                if (needToken) setSection.Append(", ");
+                setSection.AppendFormat("{0} = {1}", columName, QuoteValue(parametersForUpdate[columName]));
+                needToken = true;
+            }
+
+            needToken = false;
+            whereSection = new StringBuilder();
+            for (int i = 0; i < keyFieldNames.Length; i++)
+            {
+                if (needToken) whereSection.Append(" AND ");
+                whereSection.AppendFormat("({0} = {1})", keyFieldNames[i], QuoteValue(parametersForUpdate[keyFieldNames[i]]));
+                needToken = true;
+            }
+
+            string sentence = string.Format(updateSentence, tableName, setSection, whereSection);
+
+            DbCommand command = DB.GetSqlStringCommand(DEFAULTRANSACTIONISOLATION + sentence);
+            try
+            {
+                command.Connection = DB.CreateConnection();
+                command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+
+                DB.ExecuteNonQuery(command);
+            }
+            finally
+            {
+                command = null;
+            }
+
+            return sentence;
+        }
+
+        #endregion
+
+        #region SetAnsiWarnings
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="connection"></param>
+        /// <param name="enabled"></param>
+        public void SetAnsiWarnings(Database db, IDbConnection connection, bool enabled)
+        {
+            IDbCommand cmd = db.GetSqlStringCommand(DEFAULTRANSACTIONISOLATION + String.Format("SET ANSI_WARNINGS {0}", enabled ? "ON" : "OFF"));
+
+            try
+            {
+                cmd.Connection = connection;
+                cmd.ExecuteNonQuery();
+            }
+            finally
+            {
+                cmd = null;
+            }
+        }
+
+        #endregion
+
+        #endregion
+        
+        #region Query
+
+        #region GetDatabaseDate
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <returns></returns>
+        public DateTime GetDatabaseDate(Database db)
+        {
+            DbCommand cmd;
+            try
+            {
+                if (db is OracleDatabase)
+                {
+                    try
+                    {
+                        cmd = db.GetSqlStringCommand("begin select SYSDATE INTO :p1 from dual; end;");
+                        cmd.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+                        db.AddOutParameter(cmd, ":p1", System.Data.DbType.DateTime, 0);
+                        db.ExecuteNonQuery(cmd);
+
+                        return Convert.ToDateTime(db.GetParameterValue(cmd, ":p1"));
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(ex.Message);
+                    }
+                }
+                else if (db is SqlDatabase)
+                {
+                    cmd = db.GetSqlStringCommand("select @out = getdate()");
+                    cmd.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+                    db.AddOutParameter(cmd, "@out", DbType.DateTime, 0);
+                    db.ExecuteNonQuery(cmd);
+
+                    return Convert.ToDateTime(db.GetParameterValue(cmd, "@out"));
+                }
+
+                return DateTime.Now;
+            }
+            finally
+            {
+                cmd = null;
+            }
+        }
+
+        #endregion
+
+        #region Exists
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="primaryKeyValues"></param>
+        /// <returns></returns>
+        public bool Exists(Database DB, String tableName, Object[] primaryKeyValues)
+        {
+            return Select(DB, tableName, primaryKeyValues).Tables[tableName].Rows.Count > 0 ;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="dataFilters"></param>
+        /// <returns></returns>
+        public bool Exists(Database DB, String tableName, List<DataFilter> dataFilters)
+        {
+            return Select(DB, tableName, dataFilters).Tables[tableName].Rows.Count > 0;
+        }
+
+        #endregion
+
+        #region Select
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
+        public DataSet Select(Database DB, String tableName)  // 1)
+        {
+            if (DB == null || tableName.Equals(String.Empty))
+                throw new ArgumentException();
+
+            DbCommand command = DB.GetSqlStringCommand(String.Format("SELECT * FROM {0} (nolock) ", tableName));
+            command.Connection = DB.CreateConnection();
+            command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+            DataSet resultData = DB.ExecuteDataSet(command);
+            resultData.Tables[0].TableName = tableName;
+
+            return resultData.Copy();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="excludedColumns"></param>
+        /// <returns></returns>
+        public DataSet Select(Database DB, String tableName, List<String> excludedColumns) //  5))
+        {
+            if ((DB == null) || (tableName.Equals(String.Empty)))
+                throw new ArgumentException();
+
+            String selectSQLSentence = String.Empty;
+
+            selectSQLSentence = String.Format("SELECT {0} FROM {1} (nolock) ", GetTableAllColumnsNames(DB, tableName, excludedColumns).Join(','),
+                                                                               tableName);
+
+            DbCommand command = DB.GetSqlStringCommand(selectSQLSentence);
+            command.Connection = DB.CreateConnection();
+            command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+            DataSet resultData = DB.ExecuteDataSet(command);
+            resultData.Tables[0].TableName = tableName;
+
+            return resultData.Copy();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="primaryKeyValues"></param>
+        /// <returns></returns>
+        public DataSet Select(Database DB, String tableName, params Object[] primaryKeyValues)  // 2)
+        {
+            return Select(DB, tableName, primaryKeyValues, null);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="primaryKeyValues"></param>
+        /// <param name="excludedColumns"></param>
+        /// <returns></returns>
+        public DataSet Select(Database DB, String tableName, Object[] primaryKeyValues, List<String> excludedColumns)  // 6)
+        {
+            if ((DB == null) || (tableName.Equals(String.Empty)))
+                throw new ArgumentException();
+
+            StringBuilder sb = new StringBuilder();
+            DataTable dt = GetTableMetadata(DB, tableName);
+            bool needToken = false;
+            int pos = 0;
+            if (dt != null && dt.PrimaryKey.Length > 0)
+            {
+                foreach (DataColumn column in dt.PrimaryKey)
+                {
+                    if (needToken) sb.Append(" AND ");
+                    sb.AppendFormat("{0} = '{1}'", column.ColumnName, primaryKeyValues[pos]);
+                    pos++;
+                    needToken = true;
+                }
+                String selectSQLSentence = String.Empty;
+
+                if (!sb.ToString().Equals(String.Empty))
+                {
+                    selectSQLSentence = String.Format("SELECT {0} FROM {1} (nolock) WHERE {2} ",
+                                                      GetTableAllColumnsNames(DB, tableName, excludedColumns).Join(','),
+                                                      tableName,
+                                                      sb.ToString());
+                }
+                else
+                {
+                    selectSQLSentence = String.Format("SELECT {0} FROM {1} (nolock) ",
+                                                      GetTableAllColumnsNames(DB, tableName, excludedColumns).Join(','),
+                                                      tableName);
+                }
+
+                DbCommand command = DB.GetSqlStringCommand(selectSQLSentence);
+                command.Connection = DB.CreateConnection();
+                command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+                DataSet resultData = DB.ExecuteDataSet(command);
+                resultData.Tables[0].TableName = tableName;
+
+                return resultData;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="dataFilters"></param>
+        /// <returns></returns>
+        public DataSet Select(Database DB, String tableName, List<DataFilter> dataFilters)   // 3)   4)
+        {
+            if ((DB == null) || (tableName.Equals(String.Empty)))
+                throw new ArgumentException();
+
+            String selectSQLSentence = String.Empty;
+
+            if (dataFilters != null && dataFilters.Count > 0)
+            {
+                selectSQLSentence = String.Format("SELECT {0} FROM {1} (nolock) WHERE {2} ",
+                                                  GetTableAllColumnsNames(DB, tableName).Join(','),
+                                                  tableName,
+                                                  DataFilterManager.BuildSQLServerFilterClauseString(dataFilters));
+            }
+            else
+            {
+                selectSQLSentence = String.Format("SELECT {0} FROM {1} (nolock) ",
+                                                  GetTableAllColumnsNames(DB, tableName).Join(','),
+                                                  tableName);
+            }
+
+            DbCommand command = DB.GetSqlStringCommand(selectSQLSentence);
+            command.Connection = DB.CreateConnection();
+            command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+            DataSet resultData = DB.ExecuteDataSet(command);
+            resultData.Tables[0].TableName = tableName;
+
+            return resultData;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="dataFilters"></param>
+        /// <param name="excludedColumns"></param>
+        /// <returns></returns>
+        public DataSet Select(Database DB, String tableName, List<DataFilter> dataFilters, List<String> excludedColumns)   // 7)   8)
+        {
+            if ((DB == null) || (tableName.Equals(String.Empty)))
+                throw new ArgumentException();
+
+            String selectSQLSentence = String.Empty;
+
+            if (dataFilters != null && dataFilters.Count > 0)
+            {
+                selectSQLSentence = String.Format("SELECT {0} FROM {1} (nolock) WHERE {2} ",
+                                                  GetTableAllColumnsNames(DB, tableName, excludedColumns).Join(','),
+                                                  tableName,
+                                                  DataFilterManager.BuildSQLServerFilterClauseString(dataFilters));
+            }
+            else
+            {
+                selectSQLSentence = String.Format("SELECT {0} FROM {1} (nolock) ",
+                                  GetTableAllColumnsNames(DB, tableName, excludedColumns).Join(','),
+                                  tableName);
+            }
+
+            DbCommand command = DB.GetSqlStringCommand(selectSQLSentence);
+            command.Connection = DB.CreateConnection();
+            command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+            DataSet resultData = DB.ExecuteDataSet(command);
+            resultData.Tables[0].TableName = tableName;
+
+            return resultData;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="selectClause"></param>
+        /// <param name="fromClause"></param>
+        /// <param name="whereClause"></param>
+        /// <param name="orderByClause"></param>
+        /// <param name="dataFilters"></param>
+        /// <returns></returns>
+        public DataSet Select(Database DB, String selectClause, String fromClause, String whereClause, String orderByClause, List<DataFilter> dataFilters)  // 9)
+        {
+            if (selectClause.Equals(String.Empty) || fromClause.Equals(String.Empty))
+                throw new ArgumentException();
+
+            StringBuilder sqlSentence = new StringBuilder();
+            sqlSentence.Append(selectClause + " ");
+            sqlSentence.Append(fromClause + " ");
+
+            String additionalWhereClause = String.Empty;
+
+            if (dataFilters != null && dataFilters.Count > 0)
+            {
+                if (whereClause == String.Empty)
+                {
+                    additionalWhereClause = String.Format("{0} ", DataFilterManager.BuildSQLServerFilterClauseString(dataFilters));
+                }
+                else
+                {
+                    additionalWhereClause = String.Format(" AND {0} ", DataFilterManager.BuildSQLServerFilterClauseString(dataFilters));
+                }
+            }
+
+            if (whereClause.Equals(String.Empty))
+                if (!additionalWhereClause.Equals(String.Empty))
+                    sqlSentence.Append(String.Format("WHERE {0} ", additionalWhereClause));
+                else
+                    sqlSentence.Append(String.Format("{0} {1} ", whereClause, additionalWhereClause));
+
+            if (!sqlSentence.ToString().Equals(String.Empty))
+            {
+                DbCommand command = DB.GetSqlStringCommand(DEFAULTRANSACTIONISOLATION + sqlSentence.ToString());
+                command.Connection = DB.CreateConnection();
+                command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+                DataSet resultData = DB.ExecuteDataSet(command);
+
+                return resultData;
+            }
+
+            return new DataSet();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="selectClause"></param>
+        /// <param name="fromClause"></param>
+        /// <param name="orderByClause"></param>
+        /// <param name="dataFilters"></param>
+        /// <returns></returns>
+        public DataSet Select(Database DB, String selectClause, String fromClause, String orderByClause, List<DataFilter> dataFilters)  // 9)
+        {
+            return Select(DB, selectClause, fromClause, String.Empty, orderByClause, dataFilters);
+        }
+
+        #endregion
+
+        #region SelectTop 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="topNRows"></param>
+        /// <returns></returns>
+        public DataSet SelectTop(Database DB, String tableName, int topNRows)
+        {
+            return SelectTop(DB, tableName, null, null, topNRows);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="dataFilters"></param>
+        /// <param name="topNRows"></param>
+        /// <returns></returns>
+        public DataSet SelectTop(Database DB, String tableName, List<DataFilter> dataFilters, int topNRows)
+        {
+            return SelectTop(DB, tableName, dataFilters, null, topNRows);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="DB"></param>
+        /// <param name="tableName"></param>
+        /// <param name="dataFilters"></param>
+        /// <param name="excludedColumns"></param>
+        /// <param name="topNRows"></param>
+        /// <returns></returns>
+        public DataSet SelectTop(Database DB, String tableName, List<DataFilter> dataFilters, List<String> excludedColumns, int topNRows)
+        {
+            if ((DB == null) || (tableName.Equals(String.Empty)))
+                throw new ArgumentException();
+
+            String selectSQLSentence = String.Empty;
+
+
+            if (dataFilters != null && dataFilters.Count > 0)
+            {
+                selectSQLSentence = String.Format("SELECT TOP {0} {1} FROM {2} (nolock) WHERE {3} ",
+                                                  topNRows,
+                                                  GetTableAllColumnsNames(DB, tableName, excludedColumns).Join(','),
+                                                  tableName,
+                                                  DataFilterManager.BuildSQLServerFilterClauseString(dataFilters));
+            }
+            else
+            {
+                selectSQLSentence = String.Format("SELECT TOP {0} {1} FROM {2} (nolock) ",
+                                  topNRows,
+                                  GetTableAllColumnsNames(DB, tableName, excludedColumns).Join(','),
+                                  tableName);
+            }
+
+            DbCommand command = DB.GetSqlStringCommand(selectSQLSentence);
+            command.Connection = DB.CreateConnection();
+            command.CommandTimeout = DEFAULTEXECUTIONCOMMANDTIMEOUT;
+            DataSet resultData = DB.ExecuteDataSet(command);
+            resultData.Tables[0].TableName = tableName;
+
+            return resultData;
+        }
+
+        #endregion
+
+        #endregion
+    }
+}
