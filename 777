@@ -1,5 +1,15 @@
 Message: An error occurred while receiving the HTTP response to This could be due to the service endpoint binding not using the HTTP protocol. This could also be due to an HTTP request context being aborted by the server (possibly due to the service shutting down). See server logs for more details. 
 
+https://alexbilbie.com/guide-to-oauth-2-grants/
+https://github.com/aspnet/Docs/blob/master/aspnet/aspnet/overview/owin-and-katana/owin-oauth-20-authorization-server.md
+https://www.c-sharpcorner.com/UploadFile/ff2f08/token-based-authentication-using-Asp-Net-web-api-owin-and-i/
+https://andrewlock.net/an-introduction-to-oauth-2-using-facebook-in-asp-net-core/
+https://www.c-sharpcorner.com/UploadFile/ff2f08/token-based-authentication-using-Asp-Net-web-api-owin-and-i/
+https://stackoverflow.com/questions/19528496/bearer-token-authentication-with-asp-net-api
+https://codecanyon.net/item/android-authentication-system/12408423?_ga=2.78328084.1293939932.1523287828-1177189780.1515190287
+https://stackoverflow.com/questions/24180034/authenticated-access-to-webapi-via-facebook-token-from-android-app
+
+
 https://stackoverflow.com/questions/30444137/asp-net-web-api-social-authentication-for-web-and-mobile
 
 
