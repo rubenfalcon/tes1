@@ -1,0 +1,19 @@
+1. Definicion de horarios: L-S.
+Anf 1. 07:00am  a 03:00pm
+Anf 2. 02:30pm a 10:30pm
+
+Cierre de caja de Anf 1 se hara de 02:30pm a 03:00pm
+Cierre de caja de Anf 2 se hara de 10:00pm a 10:30pm
+
+Nota: Se analizara la factibilidad de abrir los Domingos
+
+2. Definicion de responsabilidades y metricas para administrador
+
+- Mapear estacionamientos en Miraflores, San Isidro y San Borja como 1ra etapa
+- Hacer seguimiento y control a los anfitriones
+- Revisar las camaras y asegurar que la informacion dentro del sistema de administracion 
+  de Playas de Estacionamiento vaya acorde a lo que se en las Camaras
+
+
+
+
